@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SipScope — Free SIP Calculator with Step-Up SIP, Goal Planner &amp; SIP vs Lumpsum Compare</title>
+<meta name="description" content="SipScope is a free SIP calculator with step-up SIP (annual increase), SIP vs lumpsum comparison, and a goal planner that tells you the monthly SIP needed to reach ₹1 crore. Unlimited free usage, no signup.">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{ --plum:#581C87; --plum-deep:#2A0F45; --mint:#6EE7B7; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:#1c0b30; color:#f3edff; }
+  .mesh{
+    background:
+      radial-gradient(38rem 30rem at 12% 8%, rgba(168,85,247,.55), transparent 60%),
+      radial-gradient(42rem 34rem at 88% 12%, rgba(110,231,183,.28), transparent 60%),
+      radial-gradient(50rem 40rem at 50% 110%, rgba(88,28,135,.9), transparent 65%),
+      linear-gradient(180deg,#2A0F45 0%, #1c0b30 60%, #160826 100%);
+  }
+  .mesh-soft{
+    background:
+      radial-gradient(30rem 22rem at 85% 15%, rgba(110,231,183,.12), transparent 60%),
+      radial-gradient(34rem 26rem at 8% 90%, rgba(168,85,247,.25), transparent 60%),
+      #1c0b30;
+  }
+  .glass{ background:rgba(255,255,255,.055); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.12); }
+  .glass-strong{ background:rgba(42,15,69,.72); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border:1px solid rgba(110,231,183,.22); }
+  .num-mint{ color:var(--mint); }
+  .chip{ background:rgba(110,231,183,.12); border:1px solid rgba(110,231,183,.35); color:#a7f3d0; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:9999px;
+    background:linear-gradient(90deg,#6EE7B7 var(--fill,50%), rgba(255,255,255,.14) var(--fill,50%)); outline:none; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:9999px;
+    background:#6EE7B7; border:3px solid #2A0F45; box-shadow:0 0 0 2px #6EE7B7, 0 4px 14px rgba(0,0,0,.45); cursor:pointer; }
+  input[type=range]::-moz-range-thumb{ width:18px; height:18px; border-radius:9999px; background:#6EE7B7; border:3px solid #2A0F45; cursor:pointer; }
+  .field{ background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16); color:#fff; border-radius:.75rem; padding:.65rem .9rem; width:100%; }
+  .field:focus{ outline:none; border-color:#6EE7B7; box-shadow:0 0 0 3px rgba(110,231,183,.25); }
+  .field::placeholder{ color:#b8a8d6; }
+  .bar-track{ background:rgba(255,255,255,.1); border-radius:9999px; overflow:hidden; }
+  .chapter-tag{ letter-spacing:.28em; }
+  .faq-item summary{ cursor:pointer; }
+  .tabular{ font-variant-numeric: tabular-nums; }
+  .prose-sip p{ margin-bottom:1rem; line-height:1.75; color:#e4d9f7; }
+  .prose-sip h2{ font-size:1.5rem; font-weight:800; color:#fff; margin:2.2rem 0 1rem; }
+  .prose-sip h3{ font-size:1.15rem; font-weight:700; color:#a7f3d0; margin:1.6rem 0 .75rem; }
+  .prose-sip ul{ list-style:disc; padding-left:1.5rem; margin-bottom:1rem; color:#e4d9f7; }
+  .prose-sip li{ margin-bottom:.5rem; line-height:1.7; }
+  @media print{ .no-print{ display:none !important; } }
+</style>
+</head>
+<body id="top" class="mesh">
+
+<!-- ================= HEADER ================= -->
+<header class="no-print sticky top-0 z-50 glass-strong border-b border-white/10">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2.5">
+      <svg width="34" height="34" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="36" height="36" rx="10" fill="#581C87" stroke="#6EE7B7" stroke-width="2"/>
+        <path d="M10 30 L16 22 L21 25 L26 15 L31 10" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="31" cy="10" r="3" fill="#6EE7B7"/>
+      </svg>
+      <span class="text-xl font-extrabold tracking-tight text-white">Sip<span class="num-mint">Scope</span></span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm font-semibold">
+      <a href="#top" class="text-white/80 hover:text-white transition">Home</a>
+      <a href="https://fixoraa.tech" class="px-4 py-2 rounded-full bg-[#6EE7B7] text-[#2A0F45] hover:bg-white transition font-bold">More Tools</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="no-print relative overflow-hidden">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 pt-14 pb-10 sm:pt-20 sm:pb-14 text-center">
+    <span class="inline-flex items-center gap-2 chip text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="#6EE7B7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Unlimited Free Usage &nbsp;·&nbsp; No signup &nbsp;·&nbsp; No paywall
+    </span>
+    <h1 class="mt-6 text-4xl sm:text-6xl font-black leading-tight text-white">
+      Watch a monthly habit<br class="hidden sm:block"> grow into <span class="num-mint">wealth</span>.
+    </h1>
+    <p class="mt-5 max-w-2xl mx-auto text-base sm:text-lg text-white/70 leading-relaxed">
+      SipScope is a growth-story SIP calculator: plant your monthly investment, step it up with every salary hike,
+      pit it against a lumpsum, and plan backwards from your dream corpus — all in one scroll.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3 text-xs sm:text-sm">
+      <span class="chip rounded-full px-4 py-2 font-semibold">Step-up SIP mode</span>
+      <span class="chip rounded-full px-4 py-2 font-semibold">SIP vs lumpsum compare</span>
+      <span class="chip rounded-full px-4 py-2 font-semibold">Goal planner</span>
+      <span class="chip rounded-full px-4 py-2 font-semibold">₹ Indian number format</span>
+    </div>
+    <a href="#tool" class="mt-10 inline-block px-8 py-4 rounded-2xl bg-[#6EE7B7] text-[#2A0F45] font-extrabold text-lg hover:bg-white transition shadow-[0_10px_40px_rgba(110,231,183,.35)]">
+      Begin the story ↓
+    </a>
+  </div>
+</section>
+
+<!-- ================= TOP AD ================= -->
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pt-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <div class="origin-top scale-[0.44] sm:scale-100 shrink-0">
+        <script>
+          atOptions = { 'key' : '4e68ac77881c17fe128a46565d9a4e8c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
+        </script>
+        <script src="https://www.highrevenueformat.com/4e68ac77881c17fe128a46565d9a4e8c/invoke.js"></script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHAPTER 01 : THE SEED ================= -->
+<section id="tool" class="no-print mx-auto max-w-6xl px-4 sm:px-6 pt-12 pb-6 scroll-mt-24">
+  <p class="chapter-tag text-xs font-bold text-[#6EE7B7] uppercase">Chapter 01 · The seed</p>
+  <h2 class="mt-2 text-3xl sm:text-4xl font-black text-white">Plant your monthly habit</h2>
+  <p class="mt-2 text-white/60 max-w-2xl">Every wealth story starts with a number you can afford today. Set yours — everything below updates live.</p>
+
+  <div class="mt-6 grid lg:grid-cols-5 gap-6">
+    <!-- Inputs -->
+    <div class="lg:col-span-2 glass rounded-3xl p-6 sm:p-7 space-y-7">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label for="inMonthly" class="font-bold text-white/90">Monthly SIP</label>
+          <div class="flex items-center gap-1">
+            <span class="text-[#6EE7B7] font-bold">₹</span>
+            <input id="inMonthly" type="number" min="0" max="1000000" step="500" value="10000" class="field !w-32 text-right font-bold tabular" aria-label="Monthly SIP amount in rupees">
+          </div>
+        </div>
+        <input id="slMonthly" type="range" min="500" max="100000" step="500" value="10000" aria-label="Monthly SIP slider">
+        <div class="flex justify-between text-xs text-white/40 mt-1"><span>₹500</span><span>₹1,00,000</span></div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label for="inRate" class="font-bold text-white/90">Expected return <span class="text-white/40 font-normal">(p.a.)</span></label>
+          <div class="flex items-center gap-1">
+            <input id="inRate" type="number" min="0" max="30" step="0.5" value="12" class="field !w-24 text-right font-bold tabular" aria-label="Expected annual return percent">
+            <span class="text-[#6EE7B7] font-bold">%</span>
+          </div>
+        </div>
+        <input id="slRate" type="range" min="1" max="30" step="0.5" value="12" aria-label="Expected return slider">
+        <div class="flex justify-between text-xs text-white/40 mt-1"><span>1%</span><span>30%</span></div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label for="inYears" class="font-bold text-white/90">Time period</label>
+          <div class="flex items-center gap-1">
+            <input id="inYears" type="number" min="1" max="40" step="1" value="15" class="field !w-24 text-right font-bold tabular" aria-label="Time period in years">
+            <span class="text-[#6EE7B7] font-bold">yrs</span>
+          </div>
+        </div>
+        <input id="slYears" type="range" min="1" max="40" step="1" value="15" aria-label="Time period slider">
+        <div class="flex justify-between text-xs text-white/40 mt-1"><span>1 yr</span><span>40 yrs</span></div>
+      </div>
+      <p id="hint1" class="text-sm text-amber-300 hidden">Enter a monthly amount above ₹0 to see your projection.</p>
+      <p class="text-xs text-white/40 leading-relaxed">Everything is calculated on your device — nothing you type ever leaves this page.</p>
+    </div>
+
+    <!-- Results -->
+    <div class="lg:col-span-3 glass rounded-3xl p-6 sm:p-7">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-white/50 font-bold">Projected corpus</p>
+          <p id="rCorpus" class="tabular text-4xl sm:text-5xl font-black num-mint mt-1">—</p>
+          <p id="rCorpusShort" class="text-white/50 text-sm mt-1 tabular">—</p>
+        </div>
+        <div id="donutWrap" class="w-32 h-32 sm:w-36 sm:h-36"></div>
+      </div>
+      <div class="mt-6 grid grid-cols-2 gap-4">
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <p class="text-xs uppercase tracking-widest text-white/50 font-bold">You invest</p>
+          <p id="rInvested" class="tabular text-xl sm:text-2xl font-extrabold text-white mt-1">—</p>
+        </div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+          <p class="text-xs uppercase tracking-widest text-white/50 font-bold">Growth does the rest</p>
+          <p id="rGains" class="tabular text-xl sm:text-2xl font-extrabold num-mint mt-1">—</p>
+        </div>
+      </div>
+      <div id="chart1" class="mt-6"></div>
+      <p class="mt-3 text-xs text-white/40">Area shows your corpus year by year; the dashed line tracks what you actually put in. Hover points to read values.</p>
+      <details class="mt-5 rounded-2xl bg-white/5 border border-white/10">
+        <summary class="px-5 py-3 font-bold text-white/80 cursor-pointer select-none">Year-by-year breakdown</summary>
+        <div class="px-5 pb-5 overflow-x-auto">
+          <table class="w-full text-sm tabular" id="tblYears">
+            <thead><tr class="text-left text-white/50 text-xs uppercase tracking-wider">
+              <th class="py-2 pr-4">Year</th><th class="py-2 pr-4 text-right">Invested</th><th class="py-2 text-right">Corpus</th>
+            </tr></thead>
+            <tbody class="text-white/85"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 02 : THE STEP-UP ================= -->
+<section class="no-print mx-auto max-w-6xl px-4 sm:px-6 py-10 scroll-mt-24">
+  <p class="chapter-tag text-xs font-bold text-[#6EE7B7] uppercase">Chapter 02 · The salary-hike hack</p>
+  <h2 class="mt-2 text-3xl sm:text-4xl font-black text-white">Step it up every year</h2>
+  <p class="mt-2 text-white/60 max-w-2xl">Salaries grow — why shouldn't your SIP? A step-up SIP raises your monthly amount by a fixed percentage each year. Few calculators let you see the difference this makes. Watch:</p>
+
+  <div class="mt-6 glass rounded-3xl p-6 sm:p-7">
+    <div class="grid lg:grid-cols-3 gap-6 items-start">
+      <div class="lg:col-span-1">
+        <div class="flex items-center justify-between mb-2">
+          <label for="inStep" class="font-bold text-white/90">Annual step-up</label>
+          <div class="flex items-center gap-1">
+            <input id="inStep" type="number" min="0" max="25" step="1" value="10" class="field !w-24 text-right font-bold tabular" aria-label="Annual step-up percent">
+            <span class="text-[#6EE7B7] font-bold">%</span>
+          </div>
+        </div>
+        <input id="slStep" type="range" min="0" max="25" step="1" value="10" aria-label="Annual step-up slider">
+        <div class="flex justify-between text-xs text-white/40 mt-1"><span>0%</span><span>25%</span></div>
+        <div class="mt-6 rounded-2xl bg-[#6EE7B7]/10 border border-[#6EE7B7]/30 p-4">
+          <p class="text-xs uppercase tracking-widest text-[#6EE7B7] font-bold">Extra wealth created</p>
+          <p id="rStepExtra" class="tabular text-2xl sm:text-3xl font-black num-mint mt-1">—</p>
+          <p id="rStepFinal" class="text-sm text-white/60 mt-1 tabular">—</p>
+        </div>
+      </div>
+      <div class="lg:col-span-2">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+            <p class="text-xs uppercase tracking-widest text-white/50 font-bold">Flat SIP corpus</p>
+            <p id="rFlat" class="tabular text-xl font-extrabold text-white mt-1">—</p>
+          </div>
+          <div class="rounded-2xl bg-[#6EE7B7]/10 border border-[#6EE7B7]/30 p-4">
+            <p class="text-xs uppercase tracking-widest text-[#6EE7B7] font-bold">Step-up SIP corpus</p>
+            <p id="rStepUp" class="tabular text-xl font-extrabold num-mint mt-1">—</p>
+          </div>
+        </div>
+        <div id="chart2" class="mt-5"></div>
+        <p class="mt-3 text-xs text-white/40">Mint line: step-up SIP corpus · Violet line: flat SIP corpus. Same starting amount, same return — only the annual increase differs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 03 : SIP VS LUMPSUM ================= -->
+<section class="no-print mesh-soft border-y border-white/10">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 py-12 scroll-mt-24">
+    <p class="chapter-tag text-xs font-bold text-[#6EE7B7] uppercase">Chapter 03 · The crossroads</p>
+    <h2 class="mt-2 text-3xl sm:text-4xl font-black text-white">SIP vs lumpsum: the honest face-off</h2>
+    <p class="mt-2 text-white/60 max-w-2xl">Got a chunk of money today? Compare investing it <em>all at once</em> against spreading the <em>same total</em> as a monthly SIP.</p>
+
+    <div class="mt-6 glass rounded-3xl p-6 sm:p-7">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div>
+          <label for="inLump" class="font-bold text-white/90 block mb-2">One-time lumpsum amount</label>
+          <div class="flex items-center gap-1">
+            <span class="text-[#6EE7B7] font-bold">₹</span>
+            <input id="inLump" type="number" min="0" step="1000" value="1800000" class="field text-right font-bold tabular" aria-label="Lumpsum amount in rupees">
+          </div>
+          <button id="btnMatchSip" class="mt-3 text-sm font-bold text-[#6EE7B7] hover:text-white underline underline-offset-4 decoration-dotted">
+            ↺ Set equal to my total SIP investment
+          </button>
+          <p class="mt-4 text-xs text-white/40 leading-relaxed">Time period and return are shared with Chapter 01, so the comparison stays apples-to-apples.</p>
+          <div id="rVerdict" class="mt-4 rounded-2xl bg-white/5 border border-white/10 p-4 text-sm text-white/75 leading-relaxed"></div>
+        </div>
+        <div class="lg:col-span-2 space-y-6">
+          <div>
+            <div class="flex justify-between items-baseline mb-2">
+              <p class="font-bold text-white/90">SIP path <span class="text-white/40 font-normal text-sm">— slow and steady</span></p>
+              <p id="rCmpSip" class="tabular font-extrabold num-mint">—</p>
+            </div>
+            <div class="bar-track h-9"><div id="barSip" class="h-9 rounded-full transition-all duration-700" style="width:0%;background:linear-gradient(90deg,#6EE7B7,#34d399)"></div></div>
+            <p id="rCmpSipSub" class="text-xs text-white/40 mt-1 tabular">—</p>
+          </div>
+          <div>
+            <div class="flex justify-between items-baseline mb-2">
+              <p class="font-bold text-white/90">Lumpsum path <span class="text-white/40 font-normal text-sm">— all in from day one</span></p>
+              <p id="rCmpLump" class="tabular font-extrabold text-[#c084fc]">—</p>
+            </div>
+            <div class="bar-track h-9"><div id="barLump" class="h-9 rounded-full transition-all duration-700" style="width:0%;background:linear-gradient(90deg,#a855f7,#581C87)"></div></div>
+            <p id="rCmpLumpSub" class="text-xs text-white/40 mt-1 tabular">—</p>
+          </div>
+          <div class="grid grid-cols-3 gap-3 text-center">
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-3"><p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">Invested</p><p id="rCmpInv" class="tabular font-bold text-white mt-1 text-sm sm:text-base">—</p></div>
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-3"><p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">SIP gains</p><p id="rCmpSipG" class="tabular font-bold num-mint mt-1 text-sm sm:text-base">—</p></div>
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-3"><p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">Lumpsum gains</p><p id="rCmpLumpG" class="tabular font-bold text-[#c084fc] mt-1 text-sm sm:text-base">—</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHAPTER 04 : GOAL PLANNER ================= -->
+<section class="no-print mx-auto max-w-6xl px-4 sm:px-6 py-12 scroll-mt-24">
+  <p class="chapter-tag text-xs font-bold text-[#6EE7B7] uppercase">Chapter 04 · The finish line</p>
+  <h2 class="mt-2 text-3xl sm:text-4xl font-black text-white">Plan backwards from your goal</h2>
+  <p class="mt-2 text-white/60 max-w-2xl">Name your dream corpus — the planner works in reverse and tells you exactly what monthly SIP (or one-time lumpsum) gets you there.</p>
+
+  <div class="mt-6 grid lg:grid-cols-5 gap-6">
+    <div class="lg:col-span-2 glass rounded-3xl p-6 sm:p-7 space-y-6">
+      <div>
+        <label class="font-bold text-white/90 block mb-2">Dream corpus</label>
+        <div class="flex flex-wrap gap-2 mb-3">
+          <button class="goal-preset chip rounded-full px-4 py-1.5 text-sm font-bold" data-v="5000000">₹50 L</button>
+          <button class="goal-preset chip rounded-full px-4 py-1.5 text-sm font-bold" data-v="10000000">₹1 Cr</button>
+          <button class="goal-preset chip rounded-full px-4 py-1.5 text-sm font-bold" data-v="20000000">₹2 Cr</button>
+          <button class="goal-preset chip rounded-full px-4 py-1.5 text-sm font-bold" data-v="50000000">₹5 Cr</button>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="text-[#6EE7B7] font-bold">₹</span>
+          <input id="inGoal" type="number" min="0" step="100000" value="10000000" class="field text-right font-bold tabular" aria-label="Target corpus in rupees">
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label for="inGoalYears" class="font-bold text-white/90">Years to goal</label>
+          <input id="inGoalYears" type="number" min="1" max="40" value="15" class="field !w-24 text-right font-bold tabular" aria-label="Years to reach goal">
+        </div>
+        <input id="slGoalYears" type="range" min="1" max="40" value="15" aria-label="Years to goal slider">
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label for="inGoalRate" class="font-bold text-white/90">Expected return <span class="text-white/40 font-normal">(p.a.)</span></label>
+          <div class="flex items-center gap-1">
+            <input id="inGoalRate" type="number" min="0" max="30" step="0.5" value="12" class="field !w-24 text-right font-bold tabular" aria-label="Expected return for goal">
+            <span class="text-[#6EE7B7] font-bold">%</span>
+          </div>
+        </div>
+        <input id="slGoalRate" type="range" min="1" max="30" step="0.5" value="12" aria-label="Goal return slider">
+      </div>
+    </div>
+    <div class="lg:col-span-3 glass rounded-3xl p-6 sm:p-7">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="rounded-2xl bg-[#6EE7B7]/10 border border-[#6EE7B7]/30 p-5">
+          <p class="text-xs uppercase tracking-widest text-[#6EE7B7] font-bold">Monthly SIP needed</p>
+          <p id="rGoalSip" class="tabular text-3xl sm:text-4xl font-black num-mint mt-2">—</p>
+          <p id="rGoalSipSub" class="text-xs text-white/50 mt-2 tabular">—</p>
+        </div>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <p class="text-xs uppercase tracking-widest text-white/50 font-bold">…or one-time lumpsum today</p>
+          <p id="rGoalLump" class="tabular text-3xl sm:text-4xl font-black text-[#c084fc] mt-2">—</p>
+          <p id="rGoalLumpSub" class="text-xs text-white/50 mt-2 tabular">—</p>
+        </div>
+      </div>
+      <p class="mt-6 text-sm font-bold text-white/80 mb-2">How the monthly SIP changes with returns</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm tabular" id="tblGoal">
+          <thead><tr class="text-left text-white/50 text-xs uppercase tracking-wider">
+            <th class="py-2 pr-4">Return</th><th class="py-2 pr-4 text-right">Monthly SIP</th><th class="py-2 text-right">Total invested</th>
+          </tr></thead>
+          <tbody class="text-white/85"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="mt-4 text-xs text-white/40 max-w-3xl leading-relaxed">Projections assume a constant annual return compounded monthly, with SIP instalments at the start of each month. Markets are volatile and mutual funds carry risk — treat these numbers as planning estimates, not promises. Past performance does not guarantee future results.</p>
+</section>
+
+<!-- ================= BOTTOM AD ================= -->
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pb-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <script async src="https://js.wpadmngr.com/static/adManager.js" data-admpid="464498"></script>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SEO ARTICLE ================= -->
+<main class="mx-auto max-w-4xl px-4 sm:px-6 py-12">
+  <article id="seo-article" class="prose-sip">
+    <h1 class="text-3xl sm:text-4xl font-black text-white mb-4">The Complete Guide to SIP Calculators: Plan, Step Up, and Reach Your Goals</h1>
+    <p>A Systematic Investment Plan, or SIP, is one of the simplest ideas in personal finance: invest a fixed amount every month into a mutual fund and let compounding do the heavy lifting. But behind that simplicity sits a surprisingly tricky question — <em>how much will my money actually become?</em> That is exactly what a SIP calculator answers. It takes your monthly amount, an assumed annual return, and a time horizon, and projects the corpus you could build. The answer shapes real decisions: how much to invest each month, how long to stay invested, and whether a goal like buying a house or retiring comfortably is on track.</p>
+    <p>India has embraced SIPs at an extraordinary scale. Monthly SIP inflows have grown year after year as salaried investors discovered that small, automated contributions can snowball into serious wealth over a decade or two. Yet most people still guess. They pick a round number — five thousand, ten thousand — and hope it is enough. A good SIP calculator replaces hope with arithmetic. SipScope goes further: it is built as a growth story with four chapters, because the most common real-world questions about SIPs do not fit into a single input box.</p>
+
+    <h2>How a SIP calculator actually works</h2>
+    <p>Every reputable SIP calculator — from the ones on mutual fund websites to the tools on broker platforms — uses the same future-value-of-annuity mathematics. The monthly interest rate is the annual rate divided by twelve, and the monthly investment is assumed to be made at the start of each month. The formula looks like this: <strong>FV = P × [((1 + r)^n − 1) / r] × (1 + r)</strong>, where P is the monthly investment, r is the monthly rate, and n is the total number of monthly instalments.</p>
+    <p>Take a concrete example. Invest ₹10,000 per month for 20 years at an assumed 12% annual return. The monthly rate is 1%, the number of instalments is 240, and the formula produces a projected corpus of roughly ₹99.9 lakh — tantalisingly close to ₹1 crore. Your total investment is only ₹24 lakh; the remaining ₹75.9 lakh is growth. That ratio — you put in one rupee, compounding adds three — is why long horizons matter more than large instalments.</p>
+    <p>One technical detail worth knowing: some calculators convert the annual rate with true compounding, using (1 + annual)^(1/12) − 1 as the monthly rate. Most Indian platforms, including the largest ones, simply use annual ÷ 12. SipScope follows the industry-standard annual ÷ 12 convention, so its numbers line up with the calculators you will find on major mutual fund and brokerage websites. The difference between the two conventions is small — under one percent of the final corpus — but consistency matters when you compare tools.</p>
+
+    <h2>Why your return assumption matters more than you think</h2>
+    <p>The single biggest lever in any SIP projection is the assumed return, and it is also the easiest input to get wrong. Equity mutual funds in India have historically delivered around 11–13% annualised over long periods — the Nifty 50 index has compounded at roughly that pace across decades. But history is not a promise. A calculator is a planning instrument, not a crystal ball, and prudent investors run their numbers at 10–12% even when recent years looked better.</p>
+    <p>Small changes in this input create large changes in the output because compounding is exponential. Consider a ₹10,000 monthly SIP over 20 years: at 10% it projects about ₹76 lakh; at 12% it projects about ₹99.9 lakh; at 15% it projects about ₹1.52 crore. That is a doubling of the corpus from a five-percentage-point change in assumption. The lesson is not to chase the highest plausible number — it is to pick a conservative assumption and let any outperformance be a pleasant surprise rather than a planned necessity.</p>
+    <p>Different fund categories deserve different assumptions. Large-cap and index funds cluster around 11–12% historically; mid-cap funds around 13–15% with higher volatility; small-cap funds can exceed 15% over very long periods but with gut-wrenching interim falls; debt funds sit around 6–8%. Match your assumption to the category you will actually invest in, not to the category with the prettiest past chart.</p>
+
+    <h2>Step-up SIP: the salary-hike hack most calculators skip</h2>
+    <p>Here is a feature you will rarely find on a basic SIP calculator, even though it mirrors how real careers work: the step-up SIP. Instead of investing the same amount forever, you increase your monthly SIP by a fixed percentage every year — typically 5% to 15%, roughly tracking your annual salary hike. The maths is dramatic. A ₹10,000 monthly SIP for 20 years at 12% grows to about ₹99.9 lakh. Add a 10% annual step-up and the corpus jumps to roughly ₹1.99 crore — nearly double — while the total invested rises from ₹24 lakh to about ₹68.7 lakh.</p>
+    <p>Why does it work so well? Two reasons. First, the extra money still gets years of compounding — an increase made in year three compounds for seventeen years. Second, the step-up aligns your savings rate with your income, so the higher amounts in later years feel no heavier than the starting amount felt in year one. Financial planners increasingly recommend step-ups as the default rather than the exception, especially for investors in their twenties and thirties whose incomes are on a rising curve.</p>
+    <p>There is a psychological benefit too. Flat SIPs quietly shrink in real terms: a ₹10,000 SIP started today is worth far less in purchasing power twenty years from now. A 10% annual step-up roughly keeps pace with a combination of inflation and income growth, preserving the real weight of your investing habit. If your platform supports automatic annual top-ups — many now do — set it once and forget it.</p>
+
+    <h2>SIP vs lumpsum: which actually builds more wealth?</h2>
+    <p>Suppose you receive a bonus, an inheritance, or a maturing fixed deposit. Should you invest it all at once or drip it in as a SIP? Pure mathematics favours the lumpsum: money invested on day one enjoys the full compounding period, while SIP instalments enter gradually and the later ones barely compound at all. Invest ₹24 lakh as a lumpsum at 12% for 20 years and it grows to about ₹2.31 crore — versus ₹99.9 lakh for a ₹10,000 monthly SIP totalling the same ₹24 lakh. The lumpsum wins by a wide margin on paper.</p>
+    <p>Reality is messier. Markets do not move in straight lines, and investing everything the day before a crash is a special kind of regret. SIPs buy more units when markets fall — rupee cost averaging — which softens the emotional and financial blow of volatility. They also match how most people actually earn: monthly salaries, not windfalls. The honest answer is that the lumpsum usually wins mathematically in rising markets, the SIP usually wins behaviourally for salaried investors, and a hybrid — invest part now, SIP the rest — is often the wisest compromise. SipScope's Chapter 03 lets you run both scenarios with identical totals so you can see the trade-off in your own numbers rather than in abstractions.</p>
+
+    <h2>Goal-based planning: start from the finish line</h2>
+    <p>Most people use SIP calculators forward: "I can invest X, what will I get?" Goal planning flips the question: "I need ₹1 crore in 15 years — what must I invest monthly?" The algebra is the same formula rearranged: <strong>P = FV / [((1 + r)^n − 1) / r × (1 + r)]</strong>. Plug in a ₹1 crore target, 12% return, and 15 years, and the answer is roughly ₹20,000 per month. Stretch the horizon to 20 years and the requirement halves to about ₹10,100 per month. Shrink it to 10 years and it balloons to about ₹43,000 per month.</p>
+    <p>That sensitivity to time is the most important insight goal planning offers. Every year you delay starting does not add a little to the required SIP — it multiplies it, because you lose both the contributions and their compounding. A 25-year-old needing ₹1 crore by 50 invests roughly ₹5,300 a month at 12%; a 35-year-old with the same goal and return needs about ₹20,000 a month. Time is quite literally money, which is why the best day to start was years ago and the second-best day is today.</p>
+    <p>Goal planning also clarifies which goals are realistic. A ₹5 crore retirement corpus in 15 years at 12% demands roughly ₹1 lakh per month — a number that either fits your income or tells you to extend the timeline, raise the assumed risk, or trim the goal. Facing that arithmetic early is a gift; facing it at 55 is a crisis.</p>
+
+    <h2>Taxes: the fine print on your gains</h2>
+    <p>SIP gains in equity mutual funds are taxed as capital gains. Units held for more than twelve months qualify as long-term capital gains, taxed at 12.5% on gains above ₹1.25 lakh per financial year (under current Indian tax rules). Shorter holdings attract short-term capital gains tax at 20%. Debt fund taxation follows your income-tax slab for newer investments. Calculators show pre-tax projections, so mentally haircut the final corpus — especially for large, long-held portfolios where the tax bill becomes meaningful. Rules change, so verify the current rates before you act.</p>
+
+    <h2>Five mistakes people make with SIP calculators</h2>
+    <ul>
+      <li><strong>Assuming the return is guaranteed.</strong> A calculator projects; the market decides. Build your plan on 10–12%, not on the best fund's best decade.</li>
+      <li><strong>Ignoring inflation.</strong> ₹1 crore in twenty years will not buy what ₹1 crore buys today. At 6% inflation, its purchasing power is roughly ₹31 lakh in today's money. Plan in real terms for long goals.</li>
+      <li><strong>Stopping the SIP in a crash.</strong> Pausing when markets fall means missing the cheapest units — the exact units that power the recovery. The calculator assumes you stay the course; make sure you do.</li>
+      <li><strong>Forgetting the step-up.</strong> A flat SIP is a shrinking SIP in real terms. If your income grows, your SIP should too.</li>
+      <li><strong>Comparing calculators with different conventions.</strong> Mixing a monthly-rate convention with a true-compounding one produces confusing differences. Pick one tool and stay consistent.</li>
+    </ul>
+
+    <h2>Putting it all together</h2>
+    <p>A SIP calculator is not a prediction machine — it is a decision machine. Use the standard projection to size your monthly habit. Use the step-up mode to harness your rising income. Use the SIP-vs-lumpsum comparison to deploy windfalls wisely. And use the goal planner to work backwards from the life you want to the SIP you need. Run the numbers, pick the conservative assumption, automate the investment, and then do the hardest part of all: nothing, for a very long time. That is the whole story — and now you have a tool that tells it in four chapters.</p>
+  </article>
+
+  <!-- ================= FAQ ================= -->
+  <section class="mt-14" aria-label="Frequently asked questions">
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-6">Frequently asked questions</h2>
+    <div class="space-y-4">
+      <details class="faq-item glass rounded-2xl px-5 py-4">
+        <summary class="font-bold text-white">How is a step-up SIP calculated?</summary>
+        <p class="mt-2 text-white/70 leading-relaxed text-sm">A step-up SIP has no single closed-form formula, so it is computed month by month: each month's instalment is added to the balance and the total grows at the monthly rate, and every twelve months the instalment is multiplied by (1 + step-up %). SipScope runs this simulation for every month of your horizon, which is the same method spreadsheet-based step-up calculators use.</p>
+      </details>
+      <details class="faq-item glass rounded-2xl px-5 py-4">
+        <summary class="font-bold text-white">How much SIP do I need to reach ₹1 crore?</summary>
+        <p class="mt-2 text-white/70 leading-relaxed text-sm">It depends on time and return. At a 12% annual return you need roughly ₹43,000/month for 10 years, ₹20,000/month for 15 years, or ₹10,100/month for 20 years. With a 10% annual step-up you can start far lower — around ₹15,000/month over 10 years — because the rising contributions do more of the work. Use the goal planner chapter above for your exact numbers.</p>
+      </details>
+      <details class="faq-item glass rounded-2xl px-5 py-4">
+        <summary class="font-bold text-white">Is SIP better than lumpsum investment?</summary>
+        <p class="mt-2 text-white/70 leading-relaxed text-sm">Mathematically, a lumpsum usually wins in steadily rising markets because the full amount compounds from day one. Behaviourally, SIPs win for salaried investors: they automate discipline, average out market volatility through rupee cost averaging, and match monthly income. Many investors do both — deploy part of a windfall immediately and SIP the rest.</p>
+      </details>
+      <details class="faq-item glass rounded-2xl px-5 py-4">
+        <summary class="font-bold text-white">What annual return should I assume in a SIP calculator?</summary>
+        <p class="mt-2 text-white/70 leading-relaxed text-sm">For equity mutual funds, 10–12% is a prudent long-term assumption based on historical Indian market performance (large-cap and index funds have compounded around 11–12% over long periods). Use 6–8% for debt funds. Avoid planning on 15%+ unless you fully accept the higher volatility that comes with it.</p>
+      </details>
+      <details class="faq-item glass rounded-2xl px-5 py-4">
+        <summary class="font-bold text-white">Are SIP returns taxable?</summary>
+        <p class="mt-2 text-white/70 leading-relaxed text-sm">Yes. Gains on equity mutual funds held over twelve months are taxed as long-term capital gains (12.5% above the annual ₹1.25 lakh exemption under current rules); shorter holdings are taxed as short-term gains at 20%. SIP calculators show pre-tax figures, so your actual take-home corpus will be slightly lower. Tax rules change, so confirm current rates before investing.</p>
+      </details>
+      <details class="faq-item glass rounded-2xl px-5 py-4">
+        <summary class="font-bold text-white">Does my data stay private on SipScope?</summary>
+        <p class="mt-2 text-white/70 leading-relaxed text-sm">Completely. SipScope runs entirely in your browser — every calculation happens on your device and nothing you type is sent to any server. Your last-used inputs are optionally remembered in your browser's own local storage so the page restores them next visit; you can clear them anytime by clearing site data.</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How is a step-up SIP calculated?", "acceptedAnswer": { "@type": "Answer", "text": "A step-up SIP is computed month by month: each month's instalment is added to the balance and grown at the monthly rate, and every twelve months the instalment is multiplied by (1 + step-up %). This simulation matches the method used by spreadsheet-based step-up SIP calculators." } },
+    { "@type": "Question", "name": "How much SIP do I need to reach ₹1 crore?", "acceptedAnswer": { "@type": "Answer", "text": "At a 12% annual return you need roughly ₹43,000 per month for 10 years, ₹20,000 per month for 15 years, or ₹10,100 per month for 20 years. With a 10% annual step-up you can start lower, around ₹15,000 per month over 10 years." } },
+    { "@type": "Question", "name": "Is SIP better than lumpsum investment?", "acceptedAnswer": { "@type": "Answer", "text": "Mathematically a lumpsum usually wins in rising markets because the full amount compounds from day one. Behaviourally SIPs suit salaried investors through automation and rupee cost averaging. Many investors combine both approaches." } },
+    { "@type": "Question", "name": "What annual return should I assume in a SIP calculator?", "acceptedAnswer": { "@type": "Answer", "text": "For equity mutual funds, 10-12% is a prudent long-term assumption based on historical Indian market performance. Use 6-8% for debt funds and avoid planning on 15% or more unless you accept the higher volatility." } },
+    { "@type": "Question", "name": "Are SIP returns taxable?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Equity mutual fund gains held over twelve months are taxed as long-term capital gains at 12.5% above the annual ₹1.25 lakh exemption; shorter holdings are taxed as short-term gains at 20%. SIP calculators show pre-tax figures." } },
+    { "@type": "Question", "name": "Does my data stay private on SipScope?", "acceptedAnswer": { "@type": "Answer", "text": "Completely. SipScope runs entirely in your browser; every calculation happens on your device and nothing is sent to any server. Inputs are optionally remembered in your browser's local storage only." } }
+  ]
+}
+</script>
+
+<!-- ================= FOOTER ================= -->
+<footer class="no-print border-t border-white/10">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <p class="text-sm text-white/50"><span class="font-extrabold text-white">Sip<span class="num-mint">Scope</span></span> · Free forever, no signup.</p>
+    <nav class="flex items-center gap-5 text-sm font-semibold">
+      <a href="#top" class="text-white/60 hover:text-white transition">Home</a>
+      <a href="https://fixoraa.tech" class="text-white/60 hover:text-white transition">More Tools</a>
+    </nav>
+  </div>
+  <p class="text-center text-xs text-white/30 pb-8 px-4">Mutual fund investments are subject to market risks. Projections are estimates, not guarantees.</p>
+</footer>
+
+<script>
+/* SipScope core math — pure functions shared by the HTML page and the Node tests.
+   Convention: monthly rate = annual/12 (the standard used by major Indian
+   mutual-fund platforms), payments made at the START of each month. */
+'use strict';
+
+function monthlyRate(annualPct) {
+  return annualPct / 12 / 100;
+}
+
+function cleanNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/* Standard flat SIP future value. */
+function sipFV(monthly, annualPct, years) {
+  monthly = cleanNum(monthly);
+  annualPct = cleanNum(annualPct);
+  years = Math.floor(cleanNum(years));
+  if (monthly <= 0 || years <= 0) return { fv: 0, invested: 0, gains: 0 };
+  const n = years * 12;
+  const r = monthlyRate(annualPct);
+  const invested = monthly * n;
+  const fv = r === 0
+    ? invested
+    : monthly * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+  return { fv: fv, invested: invested, gains: fv - invested };
+}
+
+/* Step-up SIP: monthly amount rises by stepUpPct every 12 months (month-by-month sim). */
+function stepUpSIPFV(monthly, annualPct, years, stepUpPct) {
+  monthly = cleanNum(monthly);
+  annualPct = cleanNum(annualPct);
+  years = Math.floor(cleanNum(years));
+  stepUpPct = cleanNum(stepUpPct);
+  if (monthly <= 0 || years <= 0) return { fv: 0, invested: 0, gains: 0, finalMonthly: 0 };
+  const r = monthlyRate(annualPct);
+  const step = 1 + stepUpPct / 100;
+  let balance = 0, invested = 0, cur = monthly;
+  const n = years * 12;
+  for (let m = 1; m <= n; m++) {
+    balance = (balance + cur) * (1 + r); // paid at start of month
+    invested += cur;
+    if (m % 12 === 0) cur = cur * step;
+  }
+  return { fv: balance, invested: invested, gains: balance - invested, finalMonthly: cur };
+}
+
+/* One-time lumpsum growth. */
+function lumpsumFV(amount, annualPct, years) {
+  amount = cleanNum(amount);
+  annualPct = cleanNum(annualPct);
+  years = Math.floor(cleanNum(years));
+  if (amount <= 0 || years <= 0) return 0;
+  return amount * Math.pow(1 + annualPct / 100, years);
+}
+
+/* Goal planner (reverse): monthly SIP needed to reach target corpus. */
+function sipForGoal(target, annualPct, years) {
+  target = cleanNum(target);
+  annualPct = cleanNum(annualPct);
+  years = Math.floor(cleanNum(years));
+  if (target <= 0 || years <= 0) return 0;
+  const n = years * 12;
+  const r = monthlyRate(annualPct);
+  if (r === 0) return target / n;
+  const factor = ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+  return target / factor;
+}
+
+/* Reverse lumpsum: one-time amount needed today for target corpus. */
+function lumpsumForGoal(target, annualPct, years) {
+  target = cleanNum(target);
+  annualPct = cleanNum(annualPct);
+  years = Math.floor(cleanNum(years));
+  if (target <= 0 || years <= 0) return 0;
+  const r = annualPct / 100;
+  return r === 0 ? target : target / Math.pow(1 + r, years);
+}
+
+/* Year-by-year invested/corpus series for charts + tables. */
+function yearlyGrowth(monthly, annualPct, years, stepUpPct) {
+  monthly = cleanNum(monthly);
+  annualPct = cleanNum(annualPct);
+  years = Math.floor(cleanNum(years));
+  stepUpPct = cleanNum(stepUpPct || 0);
+  const out = [];
+  if (monthly <= 0 || years <= 0) return out;
+  const r = monthlyRate(annualPct);
+  const step = 1 + stepUpPct / 100;
+  let balance = 0, invested = 0, cur = monthly;
+  for (let y = 1; y <= years; y++) {
+    for (let m = 1; m <= 12; m++) {
+      balance = (balance + cur) * (1 + r);
+      invested += cur;
+    }
+    cur = cur * step;
+    out.push({ year: y, invested: invested, corpus: balance });
+  }
+  return out;
+}
+
+/* Indian formatting: ₹1,00,000 style grouping. */
+function fmtIN(n) {
+  if (!Number.isFinite(n)) return '—';
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+/* Short crore/lakh notation for big numbers. */
+function fmtShort(n) {
+  if (!Number.isFinite(n)) return '—';
+  if (n >= 1e7) {
+    const v = n / 1e7;
+    return '₹' + (v >= 100 ? Math.round(v).toString() : v.toFixed(2)) + ' Cr';
+  }
+  if (n >= 1e5) {
+    const v = n / 1e5;
+    return '₹' + (v >= 100 ? Math.round(v).toString() : v.toFixed(2)) + ' L';
+  }
+  return fmtIN(n);
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    monthlyRate, cleanNum, sipFV, stepUpSIPFV, lumpsumFV,
+    sipForGoal, lumpsumForGoal, yearlyGrowth, fmtIN, fmtShort
+  };
+}
+
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+
+  // ---------- state + persistence ----------
+  var state = { monthly:10000, rate:12, years:15, step:10, lump:1800000, goal:10000000, goalYears:15, goalRate:12, lumpAuto:false };
+  try {
+    var saved = JSON.parse(localStorage.getItem('sipscope-v1') || 'null');
+    if (saved && typeof saved === 'object') { for (var k in state) if (saved[k] !== undefined) state[k] = saved[k]; }
+  } catch(e){}
+  function persist(){ try { localStorage.setItem('sipscope-v1', JSON.stringify(state)); } catch(e){} }
+
+  // ---------- slider/number pairing ----------
+  function pair(numId, slId, key, fmt){
+    var num = $(numId), sl = $(slId);
+    function paint(){ var p = (sl.value - sl.min) / (sl.max - sl.min) * 100; sl.style.setProperty('--fill', p + '%'); }
+    function fromSlider(){ state[key] = Number(sl.value); num.value = sl.value; paint(); persist(); recalc(); }
+    function fromNum(){
+      var v = Number(num.value);
+      if (!Number.isFinite(v)) v = 0;
+      state[key] = v;
+      if (v >= Number(sl.min) && v <= Number(sl.max)) { sl.value = v; }
+      paint(); persist(); recalc();
+    }
+    sl.addEventListener('input', fromSlider);
+    num.addEventListener('input', fromNum);
+    sl.value = Math.min(Math.max(state[key], Number(sl.min)), Number(sl.max));
+    num.value = state[key];
+    paint();
+  }
+  pair('inMonthly','slMonthly','monthly');
+  pair('inRate','slRate','rate');
+  pair('inYears','slYears','years');
+  pair('inStep','slStep','step');
+  pair('inGoalYears','slGoalYears','goalYears');
+  pair('inGoalRate','slGoalRate','goalRate');
+
+  $('inLump').value = state.lump;
+  $('inLump').addEventListener('input', function(){
+    state.lump = Math.max(0, Number($('inLump').value) || 0);
+    state.lumpAuto = false;
+    persist(); recalc();
+  });
+  $('inGoal').value = state.goal;
+  $('inGoal').addEventListener('input', function(){
+    state.goal = Math.max(0, Number($('inGoal').value) || 0);
+    persist(); recalc();
+  });
+  document.querySelectorAll('.goal-preset').forEach(function(b){
+    b.addEventListener('click', function(){ state.goal = Number(b.dataset.v); $('inGoal').value = state.goal; persist(); recalc(); });
+  });
+  $('btnMatchSip').addEventListener('click', function(){
+    var inv = sipFV(state.monthly, state.rate, state.years).invested;
+    state.lump = Math.round(inv); state.lumpAuto = true;
+    $('inLump').value = state.lump; persist(); recalc();
+  });
+
+  // ---------- animated counters ----------
+  var tweens = {};
+  function tween(id, to){
+    var el = $(id); if (!el) return;
+    var from = tweens[id] ? tweens[id].cur : 0;
+    if (tweens[id] && tweens[id].raf) cancelAnimationFrame(tweens[id].raf);
+    var t0 = null, dur = 650;
+    function frame(t){
+      if (!t0) t0 = t;
+      var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      var cur = from + (to - from) * e;
+      el.textContent = fmtIN(cur);
+      tweens[id] = { cur: cur, raf: null };
+      if (p < 1) tweens[id].raf = requestAnimationFrame(frame);
+    }
+    tweens[id] = { cur: from, raf: requestAnimationFrame(frame) };
+  }
+
+  // ---------- svg builders ----------
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function donut(invested, gains){
+    var total = invested + gains;
+    if (total <= 0) return '<p class="text-white/40 text-sm text-center py-10">Enter values to see the split.</p>';
+    var r = 54, c = 2 * Math.PI * r, frac = invested / total;
+    return '<svg viewBox="0 0 140 140" class="w-full h-full" role="img" aria-label="Invested versus gains chart">'
+      + '<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="20"/>'
+      + '<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="#6EE7B7" stroke-width="20" stroke-dasharray="'+(c*(1-frac)).toFixed(1)+' '+c.toFixed(1)+'" stroke-dashoffset="'+(c*0.25).toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 70 70)"/>'
+      + '<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="#a855f7" stroke-width="20" stroke-dasharray="'+(c*frac).toFixed(1)+' '+c.toFixed(1)+'" stroke-dashoffset="'+(c*0.25 - c*(1-frac)).toFixed(1)+'" stroke-linecap="round" transform="rotate(-90 70 70)"/>'
+      + '<text x="70" y="66" text-anchor="middle" fill="#fff" font-size="15" font-weight="800">'+Math.round(frac*100)+'%</text>'
+      + '<text x="70" y="84" text-anchor="middle" fill="rgba(255,255,255,.55)" font-size="10">invested</text></svg>'
+      + '<div class="flex justify-center gap-4 mt-1 text-xs"><span class="flex items-center gap-1.5 text-white/70"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#a855f7"></span>Invested</span>'
+      + '<span class="flex items-center gap-1.5 text-white/70"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#6EE7B7"></span>Gains</span></div>';
+  }
+  function areaChart(series, labels, w, h){
+    // series: [{name,color,data:[...],dash?}], x labels = years
+    w = w || 640; h = h || 260;
+    var padL = 8, padB = 22, padT = 12, iw = w - padL - 8, ih = h - padT - padB;
+    var max = 1;
+    series.forEach(function(s){ s.data.forEach(function(v){ if (v > max) max = v; }); });
+    max *= 1.05;
+    var n = series[0].data.length;
+    function X(i){ return padL + (n === 1 ? iw/2 : iw * i / (n - 1)); }
+    function Y(v){ return padT + ih * (1 - v / max); }
+    var out = '<svg viewBox="0 0 '+w+' '+h+'" class="w-full h-auto" role="img" aria-label="Growth chart">';
+    out += '<defs><linearGradient id="gMint" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="#6EE7B7" stop-opacity=".45"/><stop offset="1" stop-color="#6EE7B7" stop-opacity="0"/></linearGradient></defs>';
+    // gridlines
+    for (var g = 0; g <= 3; g++){
+      var gy = padT + ih * g / 3;
+      out += '<line x1="'+padL+'" y1="'+gy+'" x2="'+(w-8)+'" y2="'+gy+'" stroke="rgba(255,255,255,.08)"/>';
+    }
+    series.forEach(function(s, si){
+      var pts = s.data.map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); });
+      var line = 'M' + pts.join(' L');
+      if (s.fill){
+        out += '<path d="'+line+' L'+X(n-1).toFixed(1)+','+(padT+ih)+' L'+X(0).toFixed(1)+','+(padT+ih)+' Z" fill="url(#gMint)"/>';
+      }
+      out += '<path d="'+line+'" fill="none" stroke="'+s.color+'" stroke-width="3" '+(s.dash?'stroke-dasharray="7 5"':'')+' stroke-linecap="round"/>';
+      s.data.forEach(function(v,i){
+        if (n > 24 && i % 2 === 1) return;
+        out += '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="4" fill="#1c0b30" stroke="'+s.color+'" stroke-width="2.5"><title>'+esc(s.name)+' · Year '+labels[i]+': '+fmtIN(v)+'</title></circle>';
+      });
+    });
+    // x labels
+    var step = Math.ceil(n / 8);
+    for (var i = 0; i < n; i += step){
+      out += '<text x="'+X(i).toFixed(1)+'" y="'+(h-6)+'" text-anchor="middle" fill="rgba(255,255,255,.45)" font-size="11">Y'+labels[i]+'</text>';
+    }
+    out += '</svg>';
+    return out;
+  }
+
+  // ---------- master recalc ----------
+  function recalc(){
+    var monthly = state.monthly, rate = state.rate, years = Math.floor(state.years);
+    var valid = monthly > 0 && years > 0;
+    $('hint1').classList.toggle('hidden', valid);
+
+    // Chapter 01
+    var flat = valid ? sipFV(monthly, rate, years) : { fv:0, invested:0, gains:0 };
+    tween('rCorpus', flat.fv);
+    $('rCorpusShort').textContent = flat.fv > 0 ? '(' + fmtShort(flat.fv) + ' projected)' : '—';
+    $('rInvested').textContent = fmtIN(flat.invested);
+    $('rGains').textContent = fmtIN(flat.gains);
+    $('donutWrap').innerHTML = donut(flat.invested, flat.gains);
+    var yg = yearlyGrowth(monthly, rate, years, 0);
+    if (yg.length){
+      $('chart1').innerHTML = areaChart([
+        { name:'Corpus', color:'#6EE7B7', data: yg.map(function(d){return d.corpus;}), fill:true },
+        { name:'Invested', color:'#a855f7', data: yg.map(function(d){return d.invested;}), dash:true }
+      ], yg.map(function(d){return d.year;}));
+      var tb = $('tblYears').querySelector('tbody');
+      tb.innerHTML = yg.map(function(d){
+        return '<tr class="border-t border-white/5"><td class="py-2 pr-4 text-white/50">'+d.year+'</td>'
+          + '<td class="py-2 pr-4 text-right">'+fmtIN(d.invested)+'</td>'
+          + '<td class="py-2 text-right font-bold text-[#6EE7B7]">'+fmtIN(d.corpus)+'</td></tr>';
+      }).join('');
+    } else { $('chart1').innerHTML = ''; $('tblYears').querySelector('tbody').innerHTML = ''; }
+
+    // Chapter 02 — step-up
+    var su = valid ? stepUpSIPFV(monthly, rate, years, state.step) : { fv:0, invested:0, gains:0, finalMonthly:0 };
+    $('rFlat').textContent = fmtIN(flat.fv);
+    $('rStepUp').textContent = fmtIN(su.fv);
+    var extra = su.fv - flat.fv;
+    $('rStepExtra').textContent = (extra > 0 ? '+' : '') + fmtIN(extra);
+    $('rStepFinal').textContent = state.step > 0
+      ? 'Your SIP grows from ' + fmtIN(monthly) + '/mo to ' + fmtIN(su.finalMonthly / (1 + state.step/100)) + '/mo by the final year.'
+      : 'Set a step-up above 0% to see the magic.';
+    var ygS = yearlyGrowth(monthly, rate, years, state.step);
+    if (ygS.length){
+      $('chart2').innerHTML = areaChart([
+        { name:'Step-up SIP', color:'#6EE7B7', data: ygS.map(function(d){return d.corpus;}) },
+        { name:'Flat SIP', color:'#a855f7', data: yg.map(function(d){return d.corpus;}), dash:true }
+      ], ygS.map(function(d){return d.year;}));
+    } else $('chart2').innerHTML = '';
+
+    // Chapter 03 — SIP vs lumpsum
+    var lump = state.lump > 0 ? state.lump : 0;
+    var lumpFV = lump > 0 && years > 0 ? lumpsumFV(lump, rate, years) : 0;
+    $('rCmpSip').textContent = fmtIN(flat.fv);
+    $('rCmpSipSub').textContent = 'Invested ' + fmtIN(flat.invested) + ' over ' + years + ' years';
+    $('rCmpLump').textContent = fmtIN(lumpFV);
+    $('rCmpLumpSub').textContent = 'Invested ' + fmtIN(lump) + ' on day one';
+    $('rCmpInv').textContent = fmtIN(Math.max(flat.invested, lump));
+    $('rCmpSipG').textContent = fmtIN(flat.gains);
+    $('rCmpLumpG').textContent = fmtIN(Math.max(0, lumpFV - lump));
+    var mx = Math.max(flat.fv, lumpFV, 1);
+    $('barSip').style.width = (flat.fv / mx * 100).toFixed(1) + '%';
+    $('barLump').style.width = (lumpFV / mx * 100).toFixed(1) + '%';
+    var verdict;
+    if (!valid || lump <= 0) verdict = 'Enter a monthly SIP and a lumpsum amount to run the face-off.';
+    else if (Math.abs(flat.invested - lump) / Math.max(lump,1) > 0.02)
+      verdict = 'Note: the totals invested differ (' + fmtIN(flat.invested) + ' vs ' + fmtIN(lump) + '). Use “set equal to my total SIP investment” for a fair fight.';
+    else if (lumpFV > flat.fv)
+      verdict = 'The <strong class="text-white">lumpsum wins by ' + fmtIN(lumpFV - flat.fv) + '</strong> here — money invested on day one compounds for the full period. The catch: it needs the full amount upfront and nerves of steel in a crash.';
+    else if (flat.fv > lumpFV)
+      verdict = 'Interesting — the <strong class="text-white">SIP edges ahead by ' + fmtIN(flat.fv - lumpFV) + '</strong>. This can happen with low return assumptions, where spreading investments costs little in lost compounding.';
+    else verdict = 'A dead heat — both paths land within rupees of each other.';
+    $('rVerdict').innerHTML = verdict;
+
+    // Chapter 04 — goal planner
+    var goal = state.goal, gy = Math.floor(state.goalYears), gr = state.goalRate;
+    var need = (goal > 0 && gy > 0) ? sipForGoal(goal, gr, gy) : 0;
+    var needLump = (goal > 0 && gy > 0) ? lumpsumForGoal(goal, gr, gy) : 0;
+    $('rGoalSip').textContent = need > 0 ? fmtIN(need) + '/mo' : '—';
+    $('rGoalSipSub').textContent = need > 0 ? 'Total invested ≈ ' + fmtIN(need * gy * 12) + ' to reach ' + fmtShort(goal) : '—';
+    $('rGoalLump').textContent = needLump > 0 ? fmtIN(needLump) : '—';
+    $('rGoalLumpSub').textContent = needLump > 0 ? 'One-time investment today to reach ' + fmtShort(goal) : '—';
+    var gb = $('tblGoal').querySelector('tbody');
+    if (goal > 0 && gy > 0){
+      gb.innerHTML = [6,8,10,12,15].map(function(r){
+        var p = sipForGoal(goal, r, gy);
+        return '<tr class="border-t border-white/5' + (r === gr ? ' bg-[#6EE7B7]/5' : '') + '">'
+          + '<td class="py-2 pr-4 font-bold ' + (r === gr ? 'text-[#6EE7B7]' : 'text-white/60') + '">' + r + '% p.a.' + (r === gr ? ' ← yours' : '') + '</td>'
+          + '<td class="py-2 pr-4 text-right font-bold">' + fmtIN(p) + '/mo</td>'
+          + '<td class="py-2 text-right text-white/60">' + fmtShort(p * gy * 12) + '</td></tr>';
+      }).join('');
+    } else gb.innerHTML = '';
+  }
+
+  recalc();
+})();
+</script>
+</body>
+</html>
